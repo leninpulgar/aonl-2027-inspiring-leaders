@@ -23,6 +23,15 @@ export default function TemplateSelector() {
       borderHover: "hover:border-[#661c33]",
       tag: "Speaker",
     },
+    {
+      id: "exhibiting",
+      title: "Exhibiting",
+      description: "Showcase your organization and exhibit presence",
+      badgeColor: "bg-[#3d2d30]",
+      buttonClass: "bg-[#3d2d30] hover:bg-[#281d20]",
+      borderHover: "hover:border-[#3d2d30]",
+      tag: "Exhibitor",
+    },
   ];
 
   return (
@@ -39,7 +48,7 @@ export default function TemplateSelector() {
         </p>
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-6 w-full max-w-2xl">
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 w-full max-w-4xl">
         {templates.map((tpl) => (
           <div
             key={tpl.id}
