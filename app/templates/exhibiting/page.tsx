@@ -11,6 +11,7 @@ export default function BadgeCreator() {
   const [profileImage, setProfileImage] = useState<string | null>('/placeholder-avatar.png');
   const [profileImageName, setProfileImageName] = useState('');
   const [name, setName] = useState('Your name and title');
+  const [boothNumber, setBoothNumber] = useState('');
   const fileInputRef = useRef<HTMLInputElement | null>(null);
 
   // Handle resizing and dragging of avatar image
@@ -160,6 +161,12 @@ export default function BadgeCreator() {
     }
   };
 
+  const handleBoothChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    // Only allow digits up to 4 characters
+    const val = e.target.value.replace(/\D/g, '').slice(0, 4);
+    setBoothNumber(val);
+  };
+
   const resetImagePosition = () => {
     setImageOffset({ x: 0, y: 0 });
     setImageScale(1);
@@ -184,6 +191,17 @@ export default function BadgeCreator() {
     background.src = '/AONL2027_Template_LinkedIn_Exhibiting.png';
     background.onload = () => {
       ctx.drawImage(background, 0, 0, 1200, 627);
+
+      // Render booth number in the fuchsia box beside "Come say hello at Booth"
+      if (boothNumber) {
+        ctx.save();
+        ctx.font = '600 34px "Inter", Arial, sans-serif';
+        ctx.fillStyle = '#ffffff';
+        ctx.textAlign = 'center';
+        ctx.textBaseline = 'middle';
+        ctx.fillText(boothNumber, 553, 520);
+        ctx.restore();
+      }
 
       if (profileImage) {
         const profile = new Image();
@@ -223,12 +241,12 @@ export default function BadgeCreator() {
           ctx.restore();
 
           // Render name and title with crisp Inter font
-          const fontSize = 34; // Tamaño de la fuente (puedes aumentarlo ej. a 36 o 38)
-          const lineHeight = 40; // Espaciado entre líneas
+          const fontSize = 34;
+          const lineHeight = 40;
           ctx.font = `600 ${fontSize}px "Inter", Arial, sans-serif`;
           ctx.fillStyle = '#ffffff';
 
-          const maxWidth = 380; // Ancho máximo acorde al círculo (diámetro 380px)
+          const maxWidth = 380;
           const lines = [];
           let currentLine = '';
           const words = name.split(' ');
@@ -247,7 +265,7 @@ export default function BadgeCreator() {
 
           ctx.textAlign = 'center';
           const centerX = 950;
-          const startY = 530; // Posición vertical inicial
+          const startY = 530;
           lines.forEach((line, i) => {
             ctx.fillText(line.trim(), centerX, startY + i * lineHeight);
           });
@@ -258,7 +276,7 @@ export default function BadgeCreator() {
 
   useEffect(() => {
     drawCanvas();
-  }, [canvasWidth, canvasHeight, profileImage, name, imageOffset, imageScale]);
+  }, [canvasWidth, canvasHeight, profileImage, name, boothNumber, imageOffset, imageScale]);
 
   const downloadImage = () => {
     const canvas = canvasRef.current;
@@ -293,7 +311,7 @@ export default function BadgeCreator() {
               Customize Your Exhibiting Badge
             </h1>
             <p className="text-sm text-gray-500 font-sans mt-1">
-              Upload your photo or company logo, reposition or zoom, and add your name to highlight your exhibit at AONL 2027.
+              Upload your photo or company logo, reposition or zoom, and add your name and booth number to highlight your exhibit at AONL 2027.
             </p>
           </div>
 
@@ -301,7 +319,7 @@ export default function BadgeCreator() {
             variant="plum"
             onClick={() => {
               downloadImage();
-              trackEvent('download_image', { name, template: 'exhibiting' });
+              trackEvent('download_image', { name, booth: boothNumber, template: 'exhibiting' });
             }}
             className="flex items-center justify-center gap-2 px-6 py-3 shadow-md text-base"
           >
@@ -316,9 +334,9 @@ export default function BadgeCreator() {
       <div className="max-w-6xl mx-auto px-4 sm:px-6 mt-6 flex flex-col items-center gap-6">
         {/* Controls Card */}
         <div className="w-full max-w-4xl bg-white rounded-2xl border border-gray-200/80 shadow-sm p-4 sm:p-6">
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4 items-end">
-            {/* Photo Upload */}
-            <div className="space-y-1.5">
+          <div className="grid grid-cols-1 md:grid-cols-12 gap-4 items-end">
+            {/* 1. Photo Upload */}
+            <div className="md:col-span-5 space-y-1.5">
               <label className="block text-xs font-semibold uppercase tracking-wider text-gray-600">
                 1. Your Photo or Logo
               </label>
@@ -344,8 +362,8 @@ export default function BadgeCreator() {
               </div>
             </div>
 
-            {/* Name & Title Input */}
-            <div className="space-y-1.5">
+            {/* 2. Name & Title Input */}
+            <div className="md:col-span-4 space-y-1.5">
               <label className="block text-xs font-semibold uppercase tracking-wider text-gray-600">
                 2. Name and Title / Company
               </label>
@@ -355,6 +373,23 @@ export default function BadgeCreator() {
                 className="w-full border border-gray-300 focus:border-[#3d2d30] focus:ring-2 focus:ring-[#3d2d30]/20 rounded-lg px-3.5 py-2 text-sm text-gray-800 placeholder:text-gray-400 outline-none transition-all"
                 value={name}
                 onChange={(e) => setName(e.target.value)}
+                onFocus={(e) => e.target.select()}
+              />
+            </div>
+
+            {/* 3. Booth Number Input (Only for Exhibiting) */}
+            <div className="md:col-span-3 space-y-1.5">
+              <label className="block text-xs font-semibold uppercase tracking-wider text-gray-600">
+                3. Booth # (Max 4 digits)
+              </label>
+              <input
+                type="text"
+                inputMode="numeric"
+                maxLength={4}
+                placeholder="E.g., 1234"
+                className="w-full border border-gray-300 focus:border-[#3d2d30] focus:ring-2 focus:ring-[#3d2d30]/20 rounded-lg px-3.5 py-2 text-sm text-gray-800 placeholder:text-gray-400 outline-none transition-all font-semibold tracking-wider text-center"
+                value={boothNumber}
+                onChange={handleBoothChange}
                 onFocus={(e) => e.target.select()}
               />
             </div>
@@ -398,7 +433,7 @@ export default function BadgeCreator() {
             variant="plum"
             onClick={() => {
               downloadImage();
-              trackEvent('download_image', { name, template: 'exhibiting' });
+              trackEvent('download_image', { name, booth: boothNumber, template: 'exhibiting' });
             }}
             className="w-full sm:w-auto px-10 py-3.5 text-base shadow-lg flex items-center justify-center gap-2"
           >
